@@ -34,9 +34,8 @@ public class readXMLFiles extends DefaultHandler {
 	
 	//total number of hgnc words
 	private float hgncCount = 0;
-	private float totalAbstracts =7416; 
+	private float totalAbstracts =17625; 
 	private String hgncId;
-	private String diabId;
 	private String tempVal;
 	private String pmid;
 	private int counter = 0;
@@ -51,6 +50,7 @@ public class readXMLFiles extends DefaultHandler {
 	private HSSFWorkbook wb1;
 	private Sheet s;
 	private Sheet s3;
+	private Set<String> pmidlist;
 
 	
 	public void readDirectory(File[] files){
@@ -59,6 +59,7 @@ public class readXMLFiles extends DefaultHandler {
 		this.wb1 = new HSSFWorkbook();
 		this.s3 = wb1.createSheet();
 		this.terms = new HashMap<String, String>();
+		this.pmidlist = new HashSet<String>();
 		
 		for (File file : files){
 			if (file.isDirectory()){
@@ -115,11 +116,7 @@ public class readXMLFiles extends DefaultHandler {
 	if (qName.equalsIgnoreCase("z:hgnc")){
 		hgncId = attributes.getValue("ids");
 		}	
-	if (qName.equalsIgnoreCase("z:DIAB")){
-		diabId = attributes.getValue("ids");
-		}
     }
-    
     
     public void characters(char[] ch, int start, int length) throws SAXException {
 	tempVal = new String(ch,start,length);
@@ -134,7 +131,12 @@ public class readXMLFiles extends DefaultHandler {
     
     public void endElement(String uri, String localName,
 			   String qName) throws SAXException {
-
+    	
+    if(qName.equalsIgnoreCase("z:DIAB")) {
+    	// add to a list of pmid that has diab words mined.
+    	pmidlist.add(pmid);
+    }
+    	
 		 
 	if(qName.equalsIgnoreCase("z:hgnc")) {
 		//System.out.println(tempVal + " with id " + hgncId);
@@ -340,6 +342,8 @@ private Set<TermFrequencyData> tdfs = new HashSet<TermFrequencyData>();
       }
 
 	public static void main(String[] args) throws InvalidFormatException, IOException {
+		
+		//change here for the folder you want to read
 		File[] files = new File("/home/drashtti/Desktop/ontologies/Diabetes-Onto/type_2_diabetesAbstractsCuratedMined").listFiles();
 		readXMLFiles obj = new readXMLFiles();
 		obj.readDirectory(files);
